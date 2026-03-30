@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<title>宝宝一周食谱</title>
+<style>
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --primary: #00b894;
+  --bg: #f5f6fa;
+  --card: #ffffff;
+  --text: #2d3436;
+  --text2: #636e72;
+  --text3: #b2bec3;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding-top: var(--safe-top);
+  padding-bottom: calc(80px + var(--safe-bottom));
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Header ===== */
+.header {
+  background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 50%, #55efc4 100%);
+  padding: 24px 20px 20px;
+  text-align: center;
+  position: relative;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.header .sub {
+  font-size: 13px;
+  color: #2d3436cc;
+}
+.header .tags {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.header .tag {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.6);
+  color: var(--text2);
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ===== Day Tabs ===== */
+.tab-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--card);
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: #f0f0f0;
+  color: var(--text2);
+  border: none;
+  outline: none;
+  white-space: nowrap;
+}
+.tab.active {
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.tab-0.active { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+.tab-1.active { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+.tab-2.active { background: linear-gradient(135deg, #fd79a8, #e84393); }
+.tab-3.active { background: linear-gradient(135deg, #fdcb6e, #e17055); }
+.tab-4.active { background: linear-gradient(135deg, #55efc4, #00b894); }
+.tab-5.active { background: linear-gradient(135deg, #fab1a0, #e17055); }
+.tab-6.active { background: linear-gradient(135deg, #74b9ff, #6c5ce7); }
+
+/* ===== Day Content ===== */
+.day-content { display: none; padding: 16px; }
+.day-content.active { display: block; }
+
+/* Day Info Bar */
+.day-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+.day-info .day-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.day-info .day-text h2 { font-size: 17px; font-weight: 700; }
+.day-info .day-text p { font-size: 12px; color: var(--text2); }
+
+.di-0 { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+.di-1 { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+.di-2 { background: linear-gradient(135deg, #fd79a8, #e84393); }
+.di-3 { background: linear-gradient(135deg, #fdcb6e, #e17055); }
+.di-4 { background: linear-gradient(135deg, #55efc4, #00b894); }
+.di-5 { background: linear-gradient(135deg, #fab1a0, #e17055); }
+
+/* ===== Meal Card ===== */
+.meal-card {
+  background: var(--card);
+  border-radius: 16px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.meal-header {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.meal-header .emoji { font-size: 18px; }
+.meal-header.breakfast { color: #f39c12; border-bottom: 2px solid #ffeaa7; }
+.meal-header.lunch { color: #e17055; border-bottom: 2px solid #fab1a0; }
+.meal-header.dinner { color: #6c5ce7; border-bottom: 2px solid #a29bfe; }
+
+.meal-body { padding: 14px 16px; }
+
+.dish-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.staple {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.s-rice { background: #ffeaa7; color: #d68910; }
+.s-mantou { background: #dfe6e9; color: #636e72; }
+.s-dumpling { background: #a29bfe; color: #fff; }
+.s-wonton { background: #fd79a8; color: #fff; }
+.s-pasta { background: #55efc4; color: #00695c; }
+
+.ingredients {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.meat-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.mt {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.mt-pork { background: #fce4ec; color: #c62828; }
+.mt-beef { background: #efebe9; color: #4e342e; }
+.mt-chicken { background: #fff8e1; color: #f57f17; }
+.mt-fish { background: #e0f7fa; color: #00695c; }
+.mt-shrimp { background: #fce4ec; color: #d81b60; }
+.mt-egg { background: #fffde7; color: #f9a825; }
+.mt-tofu { background: #f3e5f5; color: #7b1fa2; }
+
+/* Chew badge */
+.chew {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff8e1;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #e65100;
+  font-weight: 600;
+}
+
+/* Tip */
+.tip {
+  padding: 10px 12px;
+  background: #f0f8ff;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #0984e3;
+  line-height: 1.5;
+}
+.tip-label {
+  font-weight: 700;
+  font-size: 11px;
+  color: #74b9ff;
+  margin-bottom: 2px;
+}
+
+/* ===== Overview Tab ===== */
+.overview-table {
+  width: 100%;
+  background: var(--card);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+.overview-table th {
+  background: #ffeaa7;
+  padding: 10px 6px;
+  font-weight: 700;
+  text-align: center;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.overview-table td {
+  padding: 8px 6px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.overview-table tr:last-child td { border-bottom: none; }
+
+/* Info section */
+.info-section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.info-section h3 {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.info-section li {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+.info-section li strong { color: var(--text); }
+
+/* Chew levels */
+.chew-levels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.chew-level {
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff8e1;
+}
+.chew-level h4 {
+  font-size: 13px;
+  color: #e65100;
+  margin-bottom: 4px;
+}
+.chew-level p {
+  font-size: 12px;
+  color: #795548;
+  line-height: 1.4;
+}
+.chew-level.warn {
+  background: #ffebee;
+  grid-column: 1 / -1;
+}
+.chew-level.warn h4 { color: #c62828; }
+.chew-level.warn p { color: #b71c1c; }
+
+/* Rules card */
+.rules-card {
+  background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.rules-card h3 {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.rules-card ol {
+  padding-left: 18px;
+}
+.rules-card li {
+  font-size: 13px;
+  margin-bottom: 6px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.day-content.active .meal-card {
+  animation: fadeIn 0.3s ease forwards;
+}
+.day-content.active .meal-card:nth-child(2) { animation-delay: 0.05s; }
+.day-content.active .meal-card:nth-child(3) { animation-delay: 0.1s; }
+.day-content.active .meal-card:nth-child(4) { animation-delay: 0.15s; }
+
+/* ===== Swipe hint ===== */
+.swipe-hint {
+  text-align: center;
+  padding: 20px;
+  color: var(--text3);
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>🍚 宝宝一周食谱</h1>
+  <div class="sub">3月31日（周二）— 4月5日（周日）</div>
+  <div class="tags">
+    <span class="tag">👶 15-16个月</span>
+    <span class="tag">🦷 咀嚼训练</span>
+    <span class="tag">🥩 五种肉全覆盖</span>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar" id="tabBar">
+  <button class="tab tab-0 active" onclick="switchDay(0)">周二</button>
+  <button class="tab tab-1" onclick="switchDay(1)">周三</button>
+  <button class="tab tab-2" onclick="switchDay(2)">周四</button>
+  <button class="tab tab-3" onclick="switchDay(3)">周五</button>
+  <button class="tab tab-4" onclick="switchDay(4)">周六</button>
+  <button class="tab tab-5" onclick="switchDay(5)">周日</button>
+  <button class="tab tab-6" onclick="switchDay(6)">总览</button>
+</div>
+
+<!-- ===== DAY 0: 周二 3/31 ===== -->
+<div class="day-content active" id="day-0">
+  <div class="day-info">
+    <div class="day-icon di-0">🟦</div>
+    <div class="day-text">
+      <h2>周二 · 3月31日</h2>
+      <p>🐔 鸡肉 · 🐂 牛肉 · 🥚 鸡蛋</p>
+    </div>
+  </div>
+
+  <!-- 早餐 -->
+  <div class="meal-card">
+    <div class="meal-header breakfast"><span class="emoji">☀️</span> 早餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-mantou">馒头</span> 南瓜小馒头 + 蒸蛋羹 + 胡萝卜条</div>
+      <div class="ingredients">南瓜泥和面做小馒头（自然微甜）；鸡蛋蒸嫩羹；胡萝卜蒸熟切条</div>
+      <div class="meat-tags"><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 馒头撕块自己嚼 + 胡萝卜条练咬合</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>馒头拇指大小让他自己抓着嚼；胡萝卜条蒸到能咬断但还有点韧性</div>
+    </div>
+  </div>
+
+  <!-- 午餐 -->
+  <div class="meal-card">
+    <div class="meal-header lunch"><span class="emoji">🌞</span> 午餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-rice">米饭</span> 胡萝卜鸡肉焖饭 + 清炒小白菜</div>
+      <div class="ingredients">大米 + 胡萝卜丁 + 鸡胸肉末一起焖，出锅拌匀；小白菜切碎炒软</div>
+      <div class="meat-tags"><span class="mt mt-chicken">🐔 鸡肉</span></div>
+      <div class="tip"><div class="tip-label">💡 提示</div>焖饭让米饭吸收胡萝卜甜味和鸡肉鲜味，比白饭接受度高很多 🫣</div>
+    </div>
+  </div>
+
+  <!-- 晚餐 -->
+  <div class="meal-card">
+    <div class="meal-header dinner"><span class="emoji">🌙</span> 晚餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-pasta">蝴蝶面</span> 番茄牛肉蝴蝶面 + 蒸西蓝花</div>
+      <div class="ingredients">蝴蝶面煮软，牛肉末 + 番茄丁炒成酱拌面；西蓝花蒸熟掰小朵</div>
+      <div class="meat-tags"><span class="mt mt-beef">🐂 牛肉</span></div>
+      <div class="chew">🦷 西蓝花小朵自己抓着啃</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>蝴蝶面形状有趣可以用手抓；西蓝花蒸到略有韧性，练习撕咬</div>
+    </div>
+  </div>
+
+  <div class="swipe-hint">← 左滑查看下一天 →</div>
+</div>
+
+<!-- ===== DAY 1: 周三 4/1 ===== -->
+<div class="day-content" id="day-1">
+  <div class="day-info">
+    <div class="day-icon di-1">🟪</div>
+    <div class="day-text">
+      <h2>周三 · 4月1日</h2>
+      <p>🐷 猪肉 · 🐟 鳕鱼 · 🥚 鸡蛋</p>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header breakfast"><span class="emoji">☀️</span> 早餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-rice">米饭</span> 鸡蛋青菜粥 + 苹果薄片</div>
+      <div class="ingredients">米饭加水煮成稠粥，打入蛋花，撒碎青菜叶；苹果去皮切薄片</div>
+      <div class="meat-tags"><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 苹果薄片练咬断能力</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>苹果片切薄（2-3mm），他能咬断但需要用力嚼，很好的口腔训练</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header lunch"><span class="emoji">🌞</span> 午餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-dumpling">饺子</span> 胡萝卜猪肉小饺子 + 紫菜蛋花汤</div>
+      <div class="ingredients">胡萝卜擦丝 + 猪肉末拌馅，包拇指大小的迷你饺子；紫菜蛋花汤</div>
+      <div class="meat-tags"><span class="mt mt-pork">🐷 猪肉</span><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 饺子皮需要反复咀嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>饺子包小一点他能整个塞嘴里嚼，饺子皮本身就是很好的咀嚼训练 🫣</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header dinner"><span class="emoji">🌙</span> 晚餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-mantou">馒头</span> 烤馒头片 + 清蒸鳕鱼 + 炒油菜</div>
+      <div class="ingredients">馒头切片烤到两面微黄（干烤不加油）；鳕鱼蒸熟压碎去刺；油菜切碎炒软</div>
+      <div class="meat-tags"><span class="mt mt-fish">🐟 鳕鱼</span></div>
+      <div class="chew">🦷 烤馒头片外脆需咬嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>烤到微脆比蒸馒头更需要嚼，同时更香更有吸引力；鳕鱼肉嫩几乎无刺</div>
+    </div>
+  </div>
+
+  <div class="swipe-hint">← 左滑查看下一天 →</div>
+</div>
+
+<!-- ===== DAY 2: 周四 4/2 ===== -->
+<div class="day-content" id="day-2">
+  <div class="day-info">
+    <div class="day-icon di-2">🟥</div>
+    <div class="day-text">
+      <h2>周四 · 4月2日</h2>
+      <p>🦐 虾 · 🐔 鸡肉 · 🥚 鸡蛋</p>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header breakfast"><span class="emoji">☀️</span> 早餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-pasta">蝴蝶面</span> 蔬菜蝴蝶面 + 煮蛋</div>
+      <div class="ingredients">蝴蝶面煮软配胡萝卜丁、玉米粒拌面（高汤调味）；鸡蛋煮熟切小块</div>
+      <div class="meat-tags"><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 煮蛋块需要反复嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>煮蛋切4-6块，蛋白有弹性需要多嚼；玉米粒甜味增加接受度</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header lunch"><span class="emoji">🌞</span> 午餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-rice">米饭</span> 虾仁豆腐盖饭 + 炒菠菜</div>
+      <div class="ingredients">虾仁切粒 + 嫩豆腐丁炒成浇头盖在软饭上；菠菜焯水切碎炒</div>
+      <div class="meat-tags"><span class="mt mt-shrimp">🦐 虾</span><span class="mt mt-tofu">🫘 豆腐</span></div>
+      <div class="tip"><div class="tip-label">💡 提示</div>虾仁切粒不切泥，保留一点颗粒感让他嚼；盖饭让米饭裹汁比干白饭好吃</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header dinner"><span class="emoji">🌙</span> 晚餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-wonton">云吞</span> 鸡肉玉米小云吞 + 胡萝卜丝汤底</div>
+      <div class="ingredients">鸡胸肉末 + 甜玉米粒碎做馅；云吞皮薄好嚼；胡萝卜丝做汤底</div>
+      <div class="meat-tags"><span class="mt mt-chicken">🐔 鸡肉</span></div>
+      <div class="tip"><div class="tip-label">💡 提示</div>云吞皮比饺子皮薄更软，咀嚼难度适中 🫣；玉米自带甜味增加接受度</div>
+    </div>
+  </div>
+
+  <div class="swipe-hint">← 左滑查看下一天 →</div>
+</div>
+
+<!-- ===== DAY 3: 周五 4/3 ===== -->
+<div class="day-content" id="day-3">
+  <div class="day-info">
+    <div class="day-icon di-3">🟨</div>
+    <div class="day-text">
+      <h2>周五 · 4月3日</h2>
+      <p>🐷 猪肉 · 🐟 三文鱼 · 🥚 鸡蛋</p>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header breakfast"><span class="emoji">☀️</span> 早餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-mantou">馒头</span> 红枣馒头 + 番茄炒蛋碎</div>
+      <div class="ingredients">红枣去核切碎和面做馒头（自然甜不加糖）；番茄炒蛋切成小碎块</div>
+      <div class="meat-tags"><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 馒头需要反复咀嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>红枣馒头自带甜味；番茄炒蛋是大多数宝宝都爱的"万能菜"</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header lunch"><span class="emoji">🌞</span> 午餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-pasta">蝴蝶面</span> 猪肉酱蝴蝶面 + 蒸南瓜块</div>
+      <div class="ingredients">猪肉末 + 番茄 + 洋葱碎炒成肉酱拌面；南瓜切块蒸熟</div>
+      <div class="meat-tags"><span class="mt mt-pork">🐷 猪肉</span></div>
+      <div class="tip"><div class="tip-label">💡 提示</div>肉酱浓郁藏住了肉末 🫣；南瓜甜糯好接受，切大块让他自己抓着啃</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header dinner"><span class="emoji">🌙</span> 晚餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-rice">米饭</span> 三文鱼拌饭 + 炒胡萝卜丝 + 豆腐汤</div>
+      <div class="ingredients">三文鱼煎熟压碎拌入软饭（微量酱油调味）；胡萝卜切细丝炒软；嫩豆腐汤</div>
+      <div class="meat-tags"><span class="mt mt-fish">🐟 三文鱼</span><span class="mt mt-tofu">🫘 豆腐</span></div>
+      <div class="chew">🦷 三文鱼保留小块状练咀嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>三文鱼不要压太碎，保留小颗粒感让他练嚼；配他爱的胡萝卜更容易接受</div>
+    </div>
+  </div>
+
+  <div class="swipe-hint">← 左滑查看下一天 →</div>
+</div>
+
+<!-- ===== DAY 4: 周六 4/4 ===== -->
+<div class="day-content" id="day-4">
+  <div class="day-info">
+    <div class="day-icon di-4">🟩</div>
+    <div class="day-text">
+      <h2>周六 · 4月4日</h2>
+      <p>🦐 虾 · 🐂 牛肉 · 🥚 鸡蛋</p>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header breakfast"><span class="emoji">☀️</span> 早餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-rice">米饭</span> 紫薯饭团 + 蒸蛋羹</div>
+      <div class="ingredients">紫薯蒸熟碾泥混入米饭捏成小球；鸡蛋蒸嫩羹</div>
+      <div class="meat-tags"><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 饭团有粘性需要多嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>紫色饭团视觉吸引力强，让他自己抓着吃！饭团比散米饭更需要咀嚼</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header lunch"><span class="emoji">🌞</span> 午餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-dumpling">饺子</span> 虾仁青菜小饺子 + 番茄蛋花汤</div>
+      <div class="ingredients">虾仁剁碎 + 小白菜碎做馅；迷你饺子；番茄蛋花汤</div>
+      <div class="meat-tags"><span class="mt mt-shrimp">🦐 虾</span><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 饺子皮练习反复咀嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>周末有时间可以让他摸面团玩，增加对饺子的兴趣</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header dinner"><span class="emoji">🌙</span> 晚餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-mantou">馒头</span> 葱香花卷 + 胡萝卜炖牛肉丸 + 清炒生菜</div>
+      <div class="ingredients">小葱花卷蒸熟；牛肉末搓小丸子配胡萝卜块炖软；生菜切碎炒</div>
+      <div class="meat-tags"><span class="mt mt-beef">🐂 牛肉</span></div>
+      <div class="chew">🦷 牛肉丸 + 花卷双重咀嚼训练</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>牛肉丸比肉块好嚼但仍需多嚼几次，非常好的训练食物！配他爱的胡萝卜炖</div>
+    </div>
+  </div>
+
+  <div class="swipe-hint">← 左滑查看下一天 →</div>
+</div>
+
+<!-- ===== DAY 5: 周日 4/5 ===== -->
+<div class="day-content" id="day-5">
+  <div class="day-info">
+    <div class="day-icon di-5">🟧</div>
+    <div class="day-text">
+      <h2>周日 · 4月5日</h2>
+      <p>🐷 猪肉 · 🐔 鸡肉 · 🦐 虾 · 🥚 鸡蛋</p>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header breakfast"><span class="emoji">☀️</span> 早餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-wonton">云吞</span> 猪肉香菇小云吞 + 青菜汤底</div>
+      <div class="ingredients">猪肉末 + 香菇碎做馅；蔬菜汤底煮云吞；加几片青菜叶</div>
+      <div class="meat-tags"><span class="mt mt-pork">🐷 猪肉</span></div>
+      <div class="tip"><div class="tip-label">💡 提示</div>周日早上从容一点，热汤云吞暖胃开食欲；香菇增鲜替代调味料</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header lunch"><span class="emoji">🌞</span> 午餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-rice">米饭</span> 咖喱鸡肉蔬菜饭 + 清炒娃娃菜</div>
+      <div class="ingredients">婴儿咖喱粉（无辣）+ 鸡肉丁 + 土豆丁 + 胡萝卜丁做浓稠咖喱浇饭；娃娃菜切小段</div>
+      <div class="meat-tags"><span class="mt mt-chicken">🐔 鸡肉</span></div>
+      <div class="chew">🦷 鸡肉丁保留颗粒感</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>咖喱色彩鲜艳香味浓，是让宝宝吃肉和米饭的"大杀器"；鸡肉丁切小但不打碎</div>
+    </div>
+  </div>
+
+  <div class="meal-card">
+    <div class="meal-header dinner"><span class="emoji">🌙</span> 晚餐</div>
+    <div class="meal-body">
+      <div class="dish-title"><span class="staple s-pasta">蝴蝶面</span> 虾仁蔬菜蝴蝶面 + 蒸蛋</div>
+      <div class="ingredients">蝴蝶面 + 虾仁 + 西蓝花碎 + 胡萝卜丁一锅煮；配嫩蒸蛋</div>
+      <div class="meat-tags"><span class="mt mt-shrimp">🦐 虾</span><span class="mt mt-egg">🥚 蛋</span></div>
+      <div class="chew">🦷 虾仁整颗/对半切练嚼</div>
+      <div class="tip"><div class="tip-label">💡 提示</div>虾仁不要剁碎，整颗或对半切就好，弹性口感是极好的咀嚼训练</div>
+    </div>
+  </div>
+
+  <div class="swipe-hint">← 左滑查看下一天 →</div>
+</div>
+
+<!-- ===== DAY 6: 总览 ===== -->
+<div class="day-content" id="day-6">
+
+  <div class="info-section">
+    <h3>📊 一周主食 & 肉类分布</h3>
+    <table class="overview-table">
+      <tr>
+        <th></th><th>周二</th><th>周三</th><th>周四</th><th>周五</th><th>周六</th><th>周日</th>
+      </tr>
+      <tr>
+        <td><strong>早</strong></td><td>🟤馒头</td><td>🍚粥</td><td>🦋面</td><td>🟤馒头</td><td>🍚饭团</td><td>☁️云吞</td>
+      </tr>
+      <tr>
+        <td><strong>午</strong></td><td>🍚焖饭</td><td>🥟饺子</td><td>🍚盖饭</td><td>🦋面</td><td>🥟饺子</td><td>🍚咖喱饭</td>
+      </tr>
+      <tr>
+        <td><strong>晚</strong></td><td>🦋面</td><td>🟤馒头</td><td>☁️云吞</td><td>🍚拌饭</td><td>🟤花卷</td><td>🦋面</td>
+      </tr>
+      <tr>
+        <td><strong>肉</strong></td><td>🐔🐂</td><td>🐷🐟</td><td>🦐🐔</td><td>🐷🐟</td><td>🦐🐂</td><td>🐷🐔🦐</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="info-section">
+    <h3>🦷 咀嚼训练分级</h3>
+    <p style="font-size:13px;color:#636e72;margin-bottom:8px;">咀嚼锻炼的是说话用的同一套肌肉（舌、唇、颌），吃饭就是在训练。</p>
+    <div class="chew-levels">
+      <div class="chew-level">
+        <h4>🫧 初级</h4>
+        <p>蛋白块、云吞皮、蝴蝶面、软煮蔬菜条</p>
+      </div>
+      <div class="chew-level">
+        <h4>💪 中级</h4>
+        <p>馒头、饺子皮、虾仁、三文鱼粒、牛肉丸</p>
+      </div>
+      <div class="chew-level">
+        <h4>🔥 高级</h4>
+        <p>烤馒头片、苹果薄片、西蓝花朵、鸡肉丁</p>
+      </div>
+      <div class="chew-level warn">
+        <h4>⚠️ 安全提醒</h4>
+        <p>所有咀嚼训练食物必须大人看护。不给整颗葡萄、坚果、果冻等窒息风险食物。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="rules-card">
+    <h3>📝 执行要点</h3>
+    <ol>
+      <li><strong>30分钟规则：</strong>开饭30分钟不吃就收走，下一顿再说</li>
+      <li><strong>不哄不追不喂：</strong>食物放面前，吃就吃、不吃拉倒</li>
+      <li><strong>每餐有安全食物：</strong>保留他爱的胡萝卜/青菜搭配新食物</li>
+      <li><strong>肉用隐藏模式：</strong>肉末焖饭、肉馅、肉丸、肉酱拌面</li>
+      <li><strong>批量备货：</strong>周末多包饺子/云吞冻冰箱，工作日直接煮</li>
+      <li><strong>🦷 食物看护：</strong>标注咀嚼训练的食物大人必须在旁边看</li>
+      <li><strong>全家统一执行：</strong>阿姨、老人都对齐规则</li>
+    </ol>
+  </div>
+</div>
+
+<script>
+// State
+let currentDay = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
+function switchDay(index) {
+  // Update tabs
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', i === index);
+  });
+  // Update content
+  document.querySelectorAll('.day-content').forEach((d, i) => {
+    d.classList.toggle('active', i === index);
+  });
+  // Scroll tab into view
+  const activeTab = document.querySelectorAll('.tab')[index];
+  activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  currentDay = index;
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Swipe support
+document.addEventListener('touchstart', function(e) {
+  touchStartX = e.changedTouches[0].screenX;
+}, { passive: true });
+
+document.addEventListener('touchend', function(e) {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+}, { passive: true });
+
+function handleSwipe() {
+  const diff = touchStartX - touchEndX;
+  const threshold = 60;
+  if (Math.abs(diff) < threshold) return;
+  
+  if (diff > 0 && currentDay < 6) {
+    // Swipe left -> next day
+    switchDay(currentDay + 1);
+  } else if (diff < 0 && currentDay > 0) {
+    // Swipe right -> prev day
+    switchDay(currentDay - 1);
+  }
+}
+
+// Auto select today if within range
+(function autoSelectToday() {
+  const today = new Date();
+  const m = today.getMonth() + 1;
+  const d = today.getDate();
+  const dayMap = { '3-31': 0, '4-1': 1, '4-2': 2, '4-3': 3, '4-4': 4, '4-5': 5 };
+  const key = m + '-' + d;
+  if (key in dayMap) {
+    switchDay(dayMap[key]);
+  }
+})();
+</script>
+
+</body>
+</html>
